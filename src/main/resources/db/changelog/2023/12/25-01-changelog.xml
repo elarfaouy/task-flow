@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+    <changeSet id="1703520533828-1" author="hicham">
+        <createTable tableName="jeton_usages">
+            <column name="task_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_jeton_usages"/>
+            </column>
+            <column name="action" type="VARCHAR(255)"/>
+            <column name="action_date" type="DATE"/>
+            <column name="user_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="1703520533828-2" author="hicham">
+        <createTable tableName="roles">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_roles"/>
+            </column>
+            <column name="name" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="1703520533828-3" author="hicham">
+        <createTable tableName="tag_task">
+            <column name="tag_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="task_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="1703520533828-4" author="hicham">
+        <createTable tableName="tags">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_tags"/>
+            </column>
+            <column name="name" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="1703520533828-5" author="hicham">
+        <createTable tableName="tasks">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_tasks"/>
+            </column>
+            <column name="title" type="VARCHAR(255)"/>
+            <column name="description" type="VARCHAR(255)"/>
+            <column name="priority" type="VARCHAR(255)"/>
+            <column name="status" type="VARCHAR(255)"/>
+            <column name="assign_date" type="DATE"/>
+            <column name="due_date" type="DATE"/>
+            <column name="assign_to_id" type="BIGINT"/>
+            <column name="created_by_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="1703520533828-6" author="hicham">
+        <createTable tableName="users">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_users"/>
+            </column>
+            <column name="name" type="VARCHAR(255)"/>
+            <column name="surname" type="VARCHAR(255)"/>
+            <column name="username" type="VARCHAR(255)"/>
+            <column name="email" type="VARCHAR(255)"/>
+            <column name="password" type="VARCHAR(255)"/>
+            <column name="jetons" type="INT"/>
+            <column name="role_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="1703520533828-7" author="hicham">
+        <addForeignKeyConstraint baseColumnNames="task_id" baseTableName="jeton_usages"
+                                 constraintName="FK_JETON_USAGES_ON_TASK" referencedColumnNames="id"
+                                 referencedTableName="tasks"/>
+    </changeSet>
+    <changeSet id="1703520533828-8" author="hicham">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="jeton_usages"
+                                 constraintName="FK_JETON_USAGES_ON_USER" referencedColumnNames="id"
+                                 referencedTableName="users"/>
+    </changeSet>
+    <changeSet id="1703520533828-9" author="hicham">
+        <addForeignKeyConstraint baseColumnNames="assign_to_id" baseTableName="tasks"
+                                 constraintName="FK_TASKS_ON_ASSIGNTO" referencedColumnNames="id"
+                                 referencedTableName="users"/>
+    </changeSet>
+    <changeSet id="1703520533828-10" author="hicham">
+        <addForeignKeyConstraint baseColumnNames="created_by_id" baseTableName="tasks"
+                                 constraintName="FK_TASKS_ON_CREATEDBY" referencedColumnNames="id"
+                                 referencedTableName="users"/>
+    </changeSet>
+    <changeSet id="1703520533828-11" author="hicham">
+        <addForeignKeyConstraint baseColumnNames="role_id" baseTableName="users" constraintName="FK_USERS_ON_ROLE"
+                                 referencedColumnNames="id" referencedTableName="roles"/>
+    </changeSet>
+    <changeSet id="1703520533828-12" author="hicham">
+        <addForeignKeyConstraint baseColumnNames="tag_id" baseTableName="tag_task" constraintName="fk_tag_task_on_tag"
+                                 referencedColumnNames="id" referencedTableName="tags"/>
+    </changeSet>
+    <changeSet id="1703520533828-13" author="hicham">
+        <addForeignKeyConstraint baseColumnNames="task_id" baseTableName="tag_task" constraintName="fk_tag_task_on_task"
+                                 referencedColumnNames="id" referencedTableName="tasks"/>
+    </changeSet>
+
+</databaseChangeLog>
