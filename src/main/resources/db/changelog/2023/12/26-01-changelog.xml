@@ -5,7 +5,19 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd"
         objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
-    <changeSet id="1703520533828-1" author="hicham">
+    <changeSet id="1703595404481-1" author="hicham">
+        <createSequence incrementBy="50" sequenceName="roles_seq" startValue="1"/>
+    </changeSet>
+    <changeSet id="1703595404481-2" author="hicham">
+        <createSequence incrementBy="50" sequenceName="tags_seq" startValue="1"/>
+    </changeSet>
+    <changeSet id="1703595404481-3" author="hicham">
+        <createSequence incrementBy="50" sequenceName="tasks_seq" startValue="1"/>
+    </changeSet>
+    <changeSet id="1703595404481-4" author="hicham">
+        <createSequence incrementBy="50" sequenceName="users_seq" startValue="1"/>
+    </changeSet>
+    <changeSet id="1703595404481-5" author="hicham">
         <createTable tableName="jeton_usages">
             <column name="task_id" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_jeton_usages"/>
@@ -15,7 +27,7 @@
             <column name="user_id" type="BIGINT"/>
         </createTable>
     </changeSet>
-    <changeSet id="1703520533828-2" author="hicham">
+    <changeSet id="1703595404481-6" author="hicham">
         <createTable tableName="roles">
             <column name="id" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_roles"/>
@@ -23,7 +35,7 @@
             <column name="name" type="VARCHAR(255)"/>
         </createTable>
     </changeSet>
-    <changeSet id="1703520533828-3" author="hicham">
+    <changeSet id="1703595404481-7" author="hicham">
         <createTable tableName="tag_task">
             <column name="tag_id" type="BIGINT">
                 <constraints nullable="false"/>
@@ -33,7 +45,7 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet id="1703520533828-4" author="hicham">
+    <changeSet id="1703595404481-8" author="hicham">
         <createTable tableName="tags">
             <column name="id" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_tags"/>
@@ -41,7 +53,7 @@
             <column name="name" type="VARCHAR(255)"/>
         </createTable>
     </changeSet>
-    <changeSet id="1703520533828-5" author="hicham">
+    <changeSet id="1703595404481-9" author="hicham">
         <createTable tableName="tasks">
             <column name="id" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_tasks"/>
@@ -56,7 +68,7 @@
             <column name="created_by_id" type="BIGINT"/>
         </createTable>
     </changeSet>
-    <changeSet id="1703520533828-6" author="hicham">
+    <changeSet id="1703595404481-10" author="hicham">
         <createTable tableName="users">
             <column name="id" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_users"/>
@@ -70,35 +82,35 @@
             <column name="role_id" type="BIGINT"/>
         </createTable>
     </changeSet>
-    <changeSet id="1703520533828-7" author="hicham">
+    <changeSet id="1703595404481-11" author="hicham">
         <addForeignKeyConstraint baseColumnNames="task_id" baseTableName="jeton_usages"
                                  constraintName="FK_JETON_USAGES_ON_TASK" referencedColumnNames="id"
                                  referencedTableName="tasks"/>
     </changeSet>
-    <changeSet id="1703520533828-8" author="hicham">
+    <changeSet id="1703595404481-12" author="hicham">
         <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="jeton_usages"
                                  constraintName="FK_JETON_USAGES_ON_USER" referencedColumnNames="id"
                                  referencedTableName="users"/>
     </changeSet>
-    <changeSet id="1703520533828-9" author="hicham">
+    <changeSet id="1703595404481-13" author="hicham">
         <addForeignKeyConstraint baseColumnNames="assign_to_id" baseTableName="tasks"
                                  constraintName="FK_TASKS_ON_ASSIGNTO" referencedColumnNames="id"
                                  referencedTableName="users"/>
     </changeSet>
-    <changeSet id="1703520533828-10" author="hicham">
+    <changeSet id="1703595404481-14" author="hicham">
         <addForeignKeyConstraint baseColumnNames="created_by_id" baseTableName="tasks"
                                  constraintName="FK_TASKS_ON_CREATEDBY" referencedColumnNames="id"
                                  referencedTableName="users"/>
     </changeSet>
-    <changeSet id="1703520533828-11" author="hicham">
+    <changeSet id="1703595404481-15" author="hicham">
         <addForeignKeyConstraint baseColumnNames="role_id" baseTableName="users" constraintName="FK_USERS_ON_ROLE"
                                  referencedColumnNames="id" referencedTableName="roles"/>
     </changeSet>
-    <changeSet id="1703520533828-12" author="hicham">
+    <changeSet id="1703595404481-16" author="hicham">
         <addForeignKeyConstraint baseColumnNames="tag_id" baseTableName="tag_task" constraintName="fk_tag_task_on_tag"
                                  referencedColumnNames="id" referencedTableName="tags"/>
     </changeSet>
-    <changeSet id="1703520533828-13" author="hicham">
+    <changeSet id="1703595404481-17" author="hicham">
         <addForeignKeyConstraint baseColumnNames="task_id" baseTableName="tag_task" constraintName="fk_tag_task_on_task"
                                  referencedColumnNames="id" referencedTableName="tasks"/>
     </changeSet>
