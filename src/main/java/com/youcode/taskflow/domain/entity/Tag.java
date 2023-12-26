@@ -19,12 +19,7 @@ public class Tag {
     private Long id;
     private String name;
 
-    @ManyToMany
-    @JoinTable(
-            name = "tag_task",
-            joinColumns = @JoinColumn(name = "tag_id"),
-            inverseJoinColumns = @JoinColumn(name = "task_id")
-    )
+    @ManyToMany(mappedBy = "tags")
     @ToString.Exclude
     private List<Task> tasks;
 }

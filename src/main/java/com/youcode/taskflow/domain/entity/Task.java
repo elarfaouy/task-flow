@@ -39,7 +39,12 @@ public class Task {
     @PrimaryKeyJoinColumn
     private JetonUsage jetonUsage;
 
-    @ManyToMany(mappedBy = "tasks")
+    @ManyToMany
+    @JoinTable(
+            name = "tag_task",
+            joinColumns = @JoinColumn(name = "task_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id")
+    )
     @ToString.Exclude
     private List<Tag> tags;
 }
