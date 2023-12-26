@@ -1,10 +1,15 @@
 package com.youcode.taskflow.service.impl;
 
+import com.youcode.taskflow.domain.entity.Tag;
 import com.youcode.taskflow.domain.entity.Task;
+import com.youcode.taskflow.domain.enums.TaskStatus;
 import com.youcode.taskflow.dto.StoreTaskDto;
 import com.youcode.taskflow.dto.TaskDto;
 import com.youcode.taskflow.dto.UpdateTaskDto;
+import com.youcode.taskflow.dto.UserDto;
 import com.youcode.taskflow.mapper.TaskMapper;
+import com.youcode.taskflow.mapper.UserMapper;
+import com.youcode.taskflow.repository.TagRepository;
 import com.youcode.taskflow.repository.TaskRepository;
 import com.youcode.taskflow.service.ITaskService;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +23,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TaskService implements ITaskService {
     private final TaskRepository taskRepository;
+    private final TagRepository tagRepository;
 
     @Override
     public List<TaskDto> findAll() {
@@ -32,14 +38,21 @@ public class TaskService implements ITaskService {
     }
 
     @Override
-    public TaskDto save(StoreTaskDto storeTaskDto) {
-        try {
-            Task task = TaskMapper.INSTANCE.storeTaskDtoToTask(storeTaskDto);
-            Task save = taskRepository.save(task);
-            return TaskMapper.INSTANCE.taskToTaskDto(save);
-        } catch (Exception e) {
-            throw new RuntimeException("cannot create task");
-        }
+    public TaskDto save(StoreTaskDto storeTaskDto, UserDto authUser) {
+        // convert DTO to task entity and set default values:
+        Task task = TaskMapper.INSTANCE.storeTaskDtoToTask(storeTaskDto);
+        task.setStatus(TaskStatus.TODO); // set default status to "TODO".
+        task.setCreatedBy(UserMapper.INSTANCE.userDtoToUser(authUser)); // set creator to authenticate user.
+
+        // retrieve and validate tags:
+        List<Tag> tags = storeTaskDto.getTags()
+                .stream()
+                .map(tagDto -> tagRepository.findById(tagDto.getId()).orElseThrow(() -> new RuntimeException("tag not found: " + tagDto.getId())))
+                .toList();
+        task.setTags(tags);
+
+        Task save = taskRepository.save(task);
+        return TaskMapper.INSTANCE.taskToTaskDto(save);
     }
 
     @Override

@@ -3,7 +3,9 @@ package com.youcode.taskflow.web.rest;
 import com.youcode.taskflow.dto.StoreTaskDto;
 import com.youcode.taskflow.dto.TaskDto;
 import com.youcode.taskflow.dto.UpdateTaskDto;
+import com.youcode.taskflow.dto.UserDto;
 import com.youcode.taskflow.service.ITaskService;
+import com.youcode.taskflow.service.IUserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +19,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class TaskRest {
     private final ITaskService taskService;
+    private final IUserService userService;
 
     @GetMapping
     public ResponseEntity<List<TaskDto>> getAllTasks() {
@@ -32,8 +35,9 @@ public class TaskRest {
     }
 
     @PostMapping
-    public ResponseEntity<TaskDto> storeTask(@RequestBody @Valid StoreTaskDto storeTaskDto) {
-        TaskDto taskDto = taskService.save(storeTaskDto);
+    public ResponseEntity<TaskDto> storeTask(@RequestParam Long authUserId, @RequestBody @Valid StoreTaskDto storeTaskDto) {
+        UserDto authUser = userService.findOne(authUserId);
+        TaskDto taskDto = taskService.save(storeTaskDto, authUser);
         return ResponseEntity.ok(taskDto);
     }
 
