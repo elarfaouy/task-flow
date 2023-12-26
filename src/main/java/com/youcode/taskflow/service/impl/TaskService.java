@@ -15,6 +15,7 @@ import com.youcode.taskflow.service.ITaskService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -43,6 +44,10 @@ public class TaskService implements ITaskService {
         Task task = TaskMapper.INSTANCE.storeTaskDtoToTask(storeTaskDto);
         task.setStatus(TaskStatus.TODO); // set default status to "TODO".
         task.setCreatedBy(UserMapper.INSTANCE.userDtoToUser(authUser)); // set creator to authenticate user.
+
+        if (isDurationMoreThanThreeDays(task.getAssignDate(), task.getDueDate())){
+            throw new RuntimeException("the duration more than 3 days");
+        }
 
         // retrieve and validate tags:
         List<Tag> tags = storeTaskDto.getTags()
@@ -78,5 +83,9 @@ public class TaskService implements ITaskService {
         } catch (Exception e) {
             throw new RuntimeException("cannot delete task");
         }
+    }
+
+    private Boolean isDurationMoreThanThreeDays(LocalDate startDate, LocalDate endDate) {
+        return startDate.plusDays(3).isBefore(endDate);
     }
 }
