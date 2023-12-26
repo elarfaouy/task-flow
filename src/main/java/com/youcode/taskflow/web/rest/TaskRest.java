@@ -1,9 +1,6 @@
 package com.youcode.taskflow.web.rest;
 
-import com.youcode.taskflow.dto.StoreTaskDto;
-import com.youcode.taskflow.dto.TaskDto;
-import com.youcode.taskflow.dto.UpdateTaskDto;
-import com.youcode.taskflow.dto.UserDto;
+import com.youcode.taskflow.dto.*;
 import com.youcode.taskflow.service.ITaskService;
 import com.youcode.taskflow.service.IUserService;
 import jakarta.validation.Valid;
@@ -42,13 +39,21 @@ public class TaskRest {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<TaskDto> updateTask(@PathVariable Long id, @RequestBody @Valid UpdateTaskDto updateTaskDto){
-        TaskDto taskDto = taskService.update(id, updateTaskDto);
+    public ResponseEntity<TaskDto> updateTask(@RequestParam Long authUserId, @PathVariable Long id, @RequestBody @Valid UpdateTaskDto updateTaskDto) {
+        UserDto authUser = userService.findOne(authUserId);
+        TaskDto taskDto = taskService.update(id, updateTaskDto, authUser);
+        return ResponseEntity.ok(taskDto);
+    }
+
+    @PutMapping("/{id}/status")
+    public ResponseEntity<TaskDto> updateTaskStatus(@RequestParam Long authUserId, @PathVariable Long id, @RequestBody @Valid updateTaskStatusDto updateTaskStatusDto) {
+        UserDto authUser = userService.findOne(authUserId);
+        TaskDto taskDto = taskService.updateStatus(id, updateTaskStatusDto, authUser);
         return ResponseEntity.ok(taskDto);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<TaskDto> deleteTask(@PathVariable Long id){
+    public ResponseEntity<TaskDto> deleteTask(@PathVariable Long id) {
         TaskDto taskDto = taskService.delete(id);
         return ResponseEntity.ok(taskDto);
     }

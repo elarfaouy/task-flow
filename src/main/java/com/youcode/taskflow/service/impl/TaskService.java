@@ -3,10 +3,7 @@ package com.youcode.taskflow.service.impl;
 import com.youcode.taskflow.domain.entity.Tag;
 import com.youcode.taskflow.domain.entity.Task;
 import com.youcode.taskflow.domain.enums.TaskStatus;
-import com.youcode.taskflow.dto.StoreTaskDto;
-import com.youcode.taskflow.dto.TaskDto;
-import com.youcode.taskflow.dto.UpdateTaskDto;
-import com.youcode.taskflow.dto.UserDto;
+import com.youcode.taskflow.dto.*;
 import com.youcode.taskflow.mapper.TaskMapper;
 import com.youcode.taskflow.mapper.UserMapper;
 import com.youcode.taskflow.repository.TagRepository;
@@ -17,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -45,8 +43,8 @@ public class TaskService implements ITaskService {
         task.setStatus(TaskStatus.TODO); // set default status to "TODO".
         task.setCreatedBy(UserMapper.INSTANCE.userDtoToUser(authUser)); // set creator to authenticate user.
 
-        if (isDurationMoreThanThreeDays(task.getAssignDate(), task.getDueDate())){
-            throw new RuntimeException("the duration more than 3 days");
+        if (isDurationMoreThanThreeDays(task.getAssignDate(), task.getDueDate())) {
+            throw new RuntimeException("invalid duration or more than 3 days");
         }
 
         // retrieve and validate tags:
@@ -61,16 +59,39 @@ public class TaskService implements ITaskService {
     }
 
     @Override
-    public TaskDto update(Long id, UpdateTaskDto updateTaskDto) {
+    public TaskDto update(Long id, UpdateTaskDto updateTaskDto, UserDto authUser) {
         Task task = taskRepository.findById(id).orElseThrow(() -> new RuntimeException("task not found"));
 
-        try {
-            task.setId(id);
-            Task update = taskRepository.save(task);
-            return TaskMapper.INSTANCE.taskToTaskDto(update);
-        } catch (Exception e) {
-            throw new RuntimeException("cannot update task");
+        if (authUser.getRole().getName().equals("user") && !Objects.equals(task.getCreatedBy().getId(), authUser.getId())) {
+            throw new RuntimeException("you cannot update this task, you dont have the right permission");
         }
+
+        Task newTask = TaskMapper.INSTANCE.updateTaskDtoToTask(updateTaskDto);
+        newTask.setId(id);
+        newTask.setStatus(task.getStatus());
+        newTask.setCreatedBy(task.getCreatedBy());
+//todo        newTask.setTags(task.getTags());
+
+        Task update = taskRepository.save(newTask);
+        return TaskMapper.INSTANCE.taskToTaskDto(update);
+    }
+
+    @Override
+    public TaskDto updateStatus(Long id, updateTaskStatusDto updateTaskStatusDto, UserDto authUser) {
+        Task task = taskRepository.findById(id).orElseThrow(() -> new RuntimeException("task not found"));
+
+        if (!Objects.equals(task.getAssignTo().getId(), authUser.getId())) {
+            throw new RuntimeException("you cannot update status of this task, you dont have the right permission");
+        }
+
+        if (task.getStatus() != updateTaskStatusDto.getStatus() && updateTaskStatusDto.getStatus().equals(TaskStatus.DONE) && task.getDueDate().isBefore(LocalDate.now())) {
+            throw new RuntimeException("you cannot set status to done after due date");
+        }
+
+        task.setStatus(updateTaskStatusDto.getStatus());
+
+        Task update = taskRepository.save(task);
+        return TaskMapper.INSTANCE.taskToTaskDto(update);
     }
 
     @Override
@@ -86,6 +107,6 @@ public class TaskService implements ITaskService {
     }
 
     private Boolean isDurationMoreThanThreeDays(LocalDate startDate, LocalDate endDate) {
-        return startDate.plusDays(3).isBefore(endDate);
+        return startDate.isAfter(endDate) || startDate.plusDays(3).isBefore(endDate);
     }
 }

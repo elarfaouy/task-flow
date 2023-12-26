@@ -20,8 +20,6 @@ public class UpdateTaskDto implements Serializable {
     private String description;
     @NotNull(message = "priority cannot be null")
     private TaskPriority priority;
-    @NotNull(message = "status cannot be null")
-    private TaskStatus status;
     @FutureOrPresent(message = "assign date cannot be in past")
     private LocalDate assignDate;
     @FutureOrPresent(message = "due date cannot be in past")
