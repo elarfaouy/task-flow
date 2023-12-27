@@ -43,6 +43,10 @@ public class TaskService implements ITaskService {
         task.setStatus(TaskStatus.TODO); // set default status to "TODO".
         task.setCreatedBy(UserMapper.INSTANCE.userDtoToUser(authUser)); // set creator to authenticate user.
 
+        if (authUser.getRole().getName().equals("user") && !Objects.equals(authUser.getId(), task.getAssignTo().getId())) {
+            throw new RuntimeException("as user you can not assign task to others");
+        }
+
         if (isDurationMoreThanThreeDays(task.getAssignDate(), task.getDueDate())) {
             throw new RuntimeException("invalid duration or more than 3 days");
         }
