@@ -45,6 +45,13 @@ public class TaskRest {
         return ResponseEntity.ok(taskDto);
     }
 
+    @PutMapping("/{id}/assign")
+    public ResponseEntity<TaskDto> updateTaskAssignTo(@RequestParam Long authUserId, @PathVariable Long id, @RequestBody @Valid UpdateTaskAssignToDto updateTaskAssignToDto) {
+        UserDto authUser = userService.findOne(authUserId);
+        TaskDto taskDto = taskService.updateAssignTo(id, updateTaskAssignToDto, authUser);
+        return ResponseEntity.ok(taskDto);
+    }
+
     @PutMapping("/{id}/status")
     public ResponseEntity<TaskDto> updateTaskStatus(@RequestParam Long authUserId, @PathVariable Long id, @RequestBody @Valid updateTaskStatusDto updateTaskStatusDto) {
         UserDto authUser = userService.findOne(authUserId);

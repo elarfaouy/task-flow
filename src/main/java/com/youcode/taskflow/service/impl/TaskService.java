@@ -102,6 +102,37 @@ public class TaskService implements ITaskService {
     }
 
     @Override
+    public TaskDto updateAssignTo(Long id, UpdateTaskAssignToDto updateTaskAssignToDto, UserDto authUser) {
+        Task task = taskRepository.findById(id).orElseThrow(() -> new RuntimeException("task not found"));
+        User assignTo = userRepository.findById(updateTaskAssignToDto.getAssignTo().getId()).orElseThrow(() -> new RuntimeException("user assign to not found"));
+
+        if (!Objects.equals(authUser.getRole().getName(), "admin")) {
+            if (!Objects.equals(task.getAssignTo().getId(), authUser.getId())) {
+                throw new RuntimeException("you cannot update a task not assign to you");
+            }
+
+            if (task.getJetonUsage() != null) {
+                throw new RuntimeException("this task cannot be updated, replaced task");
+            }
+
+            User user = userRepository.findById(authUser.getId()).orElseThrow(() -> new RuntimeException("user not found"));
+
+            if (user.getJetons() == 0) {
+                throw new RuntimeException("you dont have any jeton to make this action");
+            }
+
+            JetonUsage jetonUsage = new JetonUsage();
+            jetonUsage.setAction(JetonUsageAction.UPDATE);
+
+            return performUsageJeton(task, user, jetonUsage);
+        }
+
+        task.setAssignTo(assignTo);
+        taskRepository.save(task);
+        return TaskMapper.INSTANCE.taskToTaskDto(task);
+    }
+
+    @Override
     public TaskDto updateStatus(Long id, updateTaskStatusDto updateTaskStatusDto, UserDto authUser) {
         Task task = taskRepository.findById(id).orElseThrow(() -> new RuntimeException("task not found"));
 
@@ -109,7 +140,7 @@ public class TaskService implements ITaskService {
             throw new RuntimeException("you cannot update status of this task, you dont have the right permission");
         }
 
-        if (updateTaskStatusDto.getStatus().equals(TaskStatus.OUTDATED)){
+        if (updateTaskStatusDto.getStatus().equals(TaskStatus.OUTDATED)) {
             throw new RuntimeException("you cannot set status to outdated");
         }
 
@@ -153,19 +184,24 @@ public class TaskService implements ITaskService {
 
             JetonUsage jetonUsage = new JetonUsage();
             jetonUsage.setAction(JetonUsageAction.DELETE);
-            jetonUsage.setActionDate(LocalDate.now());
-            jetonUsage.setUser(user);
-            jetonUsage.setTask(task);
 
-            jetonUsageRepository.save(jetonUsage);
-
-            user.setJetons(user.getJetons() - 1);
-            userRepository.save(user);
-
-            return TaskMapper.INSTANCE.taskToTaskDto(task);
+            return performUsageJeton(task, user, jetonUsage);
         }
 
         taskRepository.delete(task);
+        return TaskMapper.INSTANCE.taskToTaskDto(task);
+    }
+
+    private TaskDto performUsageJeton(Task task, User user, JetonUsage jetonUsage) {
+        jetonUsage.setActionDate(LocalDate.now());
+        jetonUsage.setUser(user);
+        jetonUsage.setTask(task);
+
+        jetonUsageRepository.save(jetonUsage);
+
+        user.setJetons(user.getJetons() - 1);
+        userRepository.save(user);
+
         return TaskMapper.INSTANCE.taskToTaskDto(task);
     }
 
