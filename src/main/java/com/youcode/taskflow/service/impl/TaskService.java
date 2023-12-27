@@ -78,11 +78,24 @@ public class TaskService implements ITaskService {
             throw new RuntimeException("you cannot update this task, you dont have the right permission");
         }
 
+        if (isDurationMoreThanThreeDays(updateTaskDto.getAssignDate(), updateTaskDto.getDueDate())) {
+            throw new RuntimeException("invalid duration or more than 3 days");
+        }
+
         Task newTask = TaskMapper.INSTANCE.updateTaskDtoToTask(updateTaskDto);
         newTask.setId(id);
         newTask.setStatus(task.getStatus());
+        newTask.setAssignTo(task.getAssignTo());
         newTask.setCreatedBy(task.getCreatedBy());
-//todo        newTask.setTags(task.getTags());
+        newTask.setJetonUsage(task.getJetonUsage());
+
+        // retrieve and validate tags:
+        List<Tag> tags = updateTaskDto.getTags()
+                .stream()
+                .map(tagDto -> tagRepository.findById(tagDto.getId()).orElseThrow(() -> new RuntimeException("tag not found: " + tagDto.getId())))
+                .toList();
+        task.setTags(tags);
+        newTask.setTags(tags);
 
         Task update = taskRepository.save(newTask);
         return TaskMapper.INSTANCE.taskToTaskDto(update);
