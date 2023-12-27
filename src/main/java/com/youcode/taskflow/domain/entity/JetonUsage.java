@@ -21,9 +21,10 @@ public class JetonUsage {
     private JetonUsageAction action;
     private LocalDate actionDate;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @MapsId
     @JoinColumn(name = "task_id")
+    @ToString.Exclude
     private Task task;
 
     @ManyToOne
