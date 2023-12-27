@@ -96,6 +96,10 @@ public class TaskService implements ITaskService {
             throw new RuntimeException("you cannot update status of this task, you dont have the right permission");
         }
 
+        if (updateTaskStatusDto.getStatus().equals(TaskStatus.OUTDATED)){
+            throw new RuntimeException("you cannot set status to outdated");
+        }
+
         if (task.getStatus() != updateTaskStatusDto.getStatus() && updateTaskStatusDto.getStatus().equals(TaskStatus.DONE) && task.getDueDate().isBefore(LocalDate.now())) {
             throw new RuntimeException("you cannot set status to done after due date");
         }
