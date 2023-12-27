@@ -1,18 +1,24 @@
 package com.youcode.taskflow.service.impl;
 
+import com.youcode.taskflow.domain.entity.JetonUsage;
 import com.youcode.taskflow.domain.entity.Tag;
 import com.youcode.taskflow.domain.entity.Task;
+import com.youcode.taskflow.domain.entity.User;
+import com.youcode.taskflow.domain.enums.JetonUsageAction;
 import com.youcode.taskflow.domain.enums.TaskStatus;
 import com.youcode.taskflow.dto.*;
 import com.youcode.taskflow.mapper.TaskMapper;
 import com.youcode.taskflow.mapper.UserMapper;
+import com.youcode.taskflow.repository.JetonUsageRepository;
 import com.youcode.taskflow.repository.TagRepository;
 import com.youcode.taskflow.repository.TaskRepository;
+import com.youcode.taskflow.repository.UserRepository;
 import com.youcode.taskflow.service.ITaskService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -23,6 +29,8 @@ import java.util.stream.Collectors;
 public class TaskService implements ITaskService {
     private final TaskRepository taskRepository;
     private final TagRepository tagRepository;
+    private final JetonUsageRepository jetonUsageRepository;
+    private final UserRepository userRepository;
 
     @Override
     public List<TaskDto> findAll() {
@@ -99,15 +107,49 @@ public class TaskService implements ITaskService {
     }
 
     @Override
-    public TaskDto delete(Long id) {
+    public TaskDto delete(Long id, UserDto authUser) {
         Task task = taskRepository.findById(id).orElseThrow(() -> new RuntimeException("task not found"));
 
-        try {
-            taskRepository.delete(task);
+        if (!Objects.equals(task.getCreatedBy().getId(), authUser.getId()) && !Objects.equals(authUser.getRole().getName(), "admin")) {
+            if (!Objects.equals(task.getAssignTo().getId(), authUser.getId())) {
+                throw new RuntimeException("you cannot delete a task not assign to you");
+            }
+
+            if (task.getJetonUsage() != null) {
+                throw new RuntimeException("this task cannot be deleted, replaced task");
+            }
+
+            User user = userRepository.findById(authUser.getId()).orElseThrow(() -> new RuntimeException("user not found"));
+
+            if (user.getJetons() == 0) {
+                throw new RuntimeException("you dont have any jeton to make this action");
+            }
+
+            JetonUsage lastDeletedJetonUsage = user.getJetonUsages().stream()
+                    .filter(jetonUsage -> jetonUsage.getAction().equals(JetonUsageAction.DELETE))
+                    .max(Comparator.comparing(JetonUsage::getActionDate))
+                    .orElse(null);
+
+            if (lastDeletedJetonUsage != null && lastDeletedJetonUsage.getActionDate().plusDays(30).isAfter(LocalDate.now())) {
+                throw new RuntimeException("you cannot use jeton to delete, last action of delete is under 30 days");
+            }
+
+            JetonUsage jetonUsage = new JetonUsage();
+            jetonUsage.setAction(JetonUsageAction.DELETE);
+            jetonUsage.setActionDate(LocalDate.now());
+            jetonUsage.setUser(user);
+            jetonUsage.setTask(task);
+
+            jetonUsageRepository.save(jetonUsage);
+
+            user.setJetons(user.getJetons() - 1);
+            userRepository.save(user);
+
             return TaskMapper.INSTANCE.taskToTaskDto(task);
-        } catch (Exception e) {
-            throw new RuntimeException("cannot delete task");
         }
+
+        taskRepository.delete(task);
+        return TaskMapper.INSTANCE.taskToTaskDto(task);
     }
 
     private Boolean isDurationMoreThanThreeDays(LocalDate startDate, LocalDate endDate) {

@@ -53,8 +53,9 @@ public class TaskRest {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<TaskDto> deleteTask(@PathVariable Long id) {
-        TaskDto taskDto = taskService.delete(id);
+    public ResponseEntity<TaskDto> deleteTask(@RequestParam Long authUserId, @PathVariable Long id) {
+        UserDto authUser = userService.findOne(authUserId);
+        TaskDto taskDto = taskService.delete(id, authUser);
         return ResponseEntity.ok(taskDto);
     }
 }

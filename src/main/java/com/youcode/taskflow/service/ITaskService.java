@@ -18,5 +18,5 @@ public interface ITaskService {
 
     TaskDto updateStatus(Long id, updateTaskStatusDto updateTaskStatusDto, UserDto authUser);
 
-    TaskDto delete(Long id);
+    TaskDto delete(Long id, UserDto authUser);
 }
