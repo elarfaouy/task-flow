@@ -1,0 +1,6 @@
+projectKey=project:task_flow
+serverUrl=http://localhost:9000
+serverVersion=9.9.3.79811
+dashboardUrl=http://localhost:9000/dashboard?id=project%3Atask_flow
+ceTaskId=AYzVCA2LhH2V51H2BMG0
+ceTaskUrl=http://localhost:9000/api/ce/task?id=AYzVCA2LhH2V51H2BMG0
