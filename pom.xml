@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.youcode</groupId>
     <artifactId>taskflow</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
     <name>taskflow</name>
     <description>taskflow</description>
     <properties>
@@ -55,10 +55,18 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-quartz</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
