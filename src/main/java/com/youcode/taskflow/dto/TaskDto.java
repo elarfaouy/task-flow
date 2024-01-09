@@ -21,5 +21,6 @@ public class TaskDto implements Serializable {
     private LocalDate dueDate;
     private UserDto assignTo;
     private UserDto createdBy;
+    private JetonUsageDto jetonUsage;
     private List<TagDto> tags;
 }

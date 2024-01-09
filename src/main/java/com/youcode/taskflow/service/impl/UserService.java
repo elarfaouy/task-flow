@@ -8,10 +8,21 @@ import com.youcode.taskflow.service.IUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Component
 @RequiredArgsConstructor
 public class UserService implements IUserService {
     private final UserRepository userRepository;
+
+    @Override
+    public List<UserDto> findAll() {
+        return userRepository.findAll()
+                .stream()
+                .map(UserMapper.INSTANCE::userToUserDto)
+                .collect(Collectors.toList());
+    }
 
     @Override
     public UserDto findOne(Long id) {

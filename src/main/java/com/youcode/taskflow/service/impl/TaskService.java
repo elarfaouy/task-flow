@@ -188,6 +188,7 @@ public class TaskService implements ITaskService {
             return performUsageJeton(task, user, jetonUsage);
         }
 
+        task.getTags().size();
         taskRepository.delete(task);
         return TaskMapper.INSTANCE.taskToTaskDto(task);
     }
